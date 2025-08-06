@@ -93,9 +93,18 @@ pnpm start:dev
 ## 🤝 Contribuindo
 
 1. Faça um fork do projeto
-2. Crie uma branch para sua funcionalidade (`git checkout -b feat/amazing-feature`)
-3. Commit suas mudanças (`git commit -m 'feat: add amazing feature'`)
-4. Push para a branch (`git push origin feat/amazing-feature`)
+2. Crie uma branch para sua funcionalidade:
+   ```bash
+   git checkout -b feat/amazing-feature
+   ```
+3. Commit suas mudanças:
+   ```bash
+   git commit -m 'feat: add amazing feature'
+   ```
+4. Push para a branch:
+   ```bash
+   git push origin feat/amazing-feature
+   ```
 5. Abra um Pull Request
 
 ## 📄 Licença
