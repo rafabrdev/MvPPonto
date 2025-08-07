@@ -87,8 +87,9 @@ pnpm start:dev
 
 ## 📖 Documentação
 
-- [Git Workflow](./docs/GIT_WORKFLOW.md) - Boas práticas de versionamento
-- [Documentação API](./api/docs/) - Documentação da API
+- [📋 Guia de Testes](./docs/TESTS.md) - Guia completo para executar e manter testes
+- [🔄 Git Workflow](./docs/GIT_WORKFLOW.md) - Boas práticas de versionamento
+- [📚 Documentação API](./api/docs/) - Documentação da API
 
 ## 🤝 Contribuindo
 
