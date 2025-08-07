@@ -27,7 +27,7 @@ export class User {
   email: string;
 
   @Column()
-  passwordHash: string;
+  passwordHash?: string;
 
   @Column({
     type: 'enum',

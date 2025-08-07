@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
@@ -8,11 +8,13 @@ import { SchedulesModule } from './schedules/schedules.module';
 import { User } from './users/entities/user.entity';
 import { TimeEntry } from './time-entries/entities/time-entry.entity';
 import { Schedule } from './schedules/entities/schedule.entity';
+import { RateLimitMiddleware, AuthRateLimitMiddleware } from './common/middleware/rate-limit';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -26,6 +28,7 @@ import { Schedule } from './schedules/entities/schedule.entity';
         entities: [User, TimeEntry, Schedule],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development',
+        ssl: configService.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
       }),
       inject: [ConfigService],
     }),
@@ -34,5 +37,16 @@ import { Schedule } from './schedules/entities/schedule.entity';
     TimeEntriesModule,
     SchedulesModule,
   ],
+  providers: [RateLimitMiddleware, AuthRateLimitMiddleware],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Rate limiting geral
+    consumer
+      .apply(RateLimitMiddleware)
+      .forRoutes('*');
+    
+    // Rate limiting específico para login
+    consumer
+      .apply(AuthRateLimitMiddleware)
+      .forRoutes('auth/login')}};

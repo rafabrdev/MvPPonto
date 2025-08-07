@@ -1,13 +1,16 @@
 version: '3.8'
 
 services:
+  # Banco de dados PostgreSQL
   postgres:
     image: postgres:15-alpine
     restart: always
+    container_name: mvpponto-db
     environment:
       POSTGRES_DB: mvpponto
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
     ports:
       - "5432:5432"
     volumes:
@@ -18,17 +21,83 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - mvpponto-network
 
+  # Interface web para PostgreSQL
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: always
+    container_name: mvpponto-pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@mvpponto.com
       PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
       - "8080:80"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    networks:
+      - mvpponto-network
+
+  # API Backend (opcional - para desenvolvimento com Docker)
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    restart: always
+    container_name: mvpponto-api
+    environment:
+      - NODE_ENV=development
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=mvpponto
+      - JWT_SECRET=sua_chave_secreta_super_segura_aqui
+      - JWT_EXPIRES_IN=1h
+      - JWT_REFRESH_EXPIRES_IN=7d
+      - PORT=3000
+      - CORS_ORIGIN=http://localhost:5173
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - mvpponto-network
+    profiles:
+      - full-stack
+
+  # Frontend Web (opcional - para desenvolvimento com Docker)
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    restart: always
+    container_name: mvpponto-web
+    environment:
+      - VITE_API_URL=http://localhost:3000/api/v1
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    networks:
+      - mvpponto-network
+    profiles:
+      - full-stack
 
 volumes:
   postgres_data:
+    driver: local
+
+networks:
+  mvpponto-network:
+    driver: bridge
