@@ -59,10 +59,10 @@ export const Header: React.FC<HeaderProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 className="text-2xl font-bold text-foreground"
               >
-                {getGreeting()}, {user?.name?.split(' ')[0]}! 👋
+                Dashboard
               </motion.h1>
               <p className="text-sm text-muted-foreground">
-                Hoje é {new Date().toLocaleDateString('pt-BR', { 
+                {new Date().toLocaleDateString('pt-BR', { 
                   weekday: 'long', 
                   day: 'numeric', 
                   month: 'long' 

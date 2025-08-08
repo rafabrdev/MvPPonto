@@ -49,32 +49,33 @@ const MetricCard: React.FC<MetricCardProps> = ({
     transition={{ duration: 0.3 }}
   >
     <Card className="relative overflow-hidden">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
+      <CardContent className="p-6 text-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className={`p-3 rounded-xl bg-${color}-500/10 mx-auto`}>
+            {icon}
+          </div>
+          
           <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold">{value}</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{title}</p>
+            <p className="text-3xl font-bold tracking-tight">{value}</p>
             {subtitle && (
               <p className="text-xs text-muted-foreground">{subtitle}</p>
             )}
           </div>
-          <div className={`p-3 rounded-xl bg-${color}-500/10`}>
-            {icon}
-          </div>
+          
+          {trend && (
+            <div className={`flex items-center text-xs font-medium ${
+              trend.isPositive ? 'text-green-600' : 'text-red-600'
+            }`}>
+              <TrendingUp className={`h-3 w-3 mr-1 ${trend.isPositive ? '' : 'rotate-180'}`} />
+              {trend.value}% vs. semana passada
+            </div>
+          )}
         </div>
-        
-        {trend && (
-          <div className={`flex items-center mt-4 text-xs ${
-            trend.isPositive ? 'text-green-600' : 'text-red-600'
-          }`}>
-            <TrendingUp className="h-3 w-3 mr-1" />
-            {trend.value}% vs. semana passada
-          </div>
-        )}
       </CardContent>
       
       {/* Background gradient */}
-      <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-l from-${color}-500/5 to-transparent rounded-full transform translate-x-16 -translate-y-16`} />
+      <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-l from-${color}-500/5 to-transparent rounded-full transform translate-x-8 -translate-y-8`} />
     </Card>
   </motion.div>
 );
@@ -205,67 +206,69 @@ export const Dashboard: React.FC = () => {
         >
           <Card className="relative overflow-hidden bg-gradient-to-r from-primary-500/10 via-primary-600/10 to-primary-700/10 border-primary-500/20">
             <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-full ${currentStatus.bgColor}`}>
-                      <StatusIcon className="h-5 w-5 text-white" />
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+                <div className="flex-1 space-y-6">
+                  <div className="flex items-center justify-center lg:justify-start gap-4">
+                    <div className={`p-3 rounded-full ${currentStatus.bgColor} shadow-lg`}>
+                      <StatusIcon className="h-6 w-6 text-white" />
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Status atual</p>
-                      <p className={`text-lg font-semibold ${currentStatus.color}`}>
+                    <div className="text-center lg:text-left">
+                      <p className="text-sm font-medium text-muted-foreground">Status atual</p>
+                      <p className={`text-xl font-bold ${currentStatus.color}`}>
                         {currentStatus.label}
                       </p>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-4 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Entrada</p>
-                      <p className="text-xl font-mono font-semibold">
-                        {dashboardData?.entries.checkIn 
-                          ? formatTime(dashboardData.entries.checkIn)
-                          : '--:--'
-                        }
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Saída Almoço</p>
-                      <p className="text-xl font-mono font-semibold">
-                        {dashboardData?.entries.lunchOut 
-                          ? formatTime(dashboardData.entries.lunchOut)
-                          : '--:--'
-                        }
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Volta Almoço</p>
-                      <p className="text-xl font-mono font-semibold">
-                        {dashboardData?.entries.lunchIn 
-                          ? formatTime(dashboardData.entries.lunchIn)
-                          : '--:--'
-                        }
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Saída</p>
-                      <p className="text-xl font-mono font-semibold">
-                        {dashboardData?.entries.checkOut 
-                          ? formatTime(dashboardData.entries.checkOut)
-                          : '--:--'
-                        }
-                      </p>
+                  <div className="bg-white/50 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="text-center">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Entrada</p>
+                        <p className="text-xl font-mono font-bold">
+                          {dashboardData?.entries.checkIn 
+                            ? formatTime(dashboardData.entries.checkIn)
+                            : '--:--'
+                          }
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Saída Almoço</p>
+                        <p className="text-xl font-mono font-bold">
+                          {dashboardData?.entries.lunchOut 
+                            ? formatTime(dashboardData.entries.lunchOut)
+                            : '--:--'
+                          }
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Volta Almoço</p>
+                        <p className="text-xl font-mono font-bold">
+                          {dashboardData?.entries.lunchIn 
+                            ? formatTime(dashboardData.entries.lunchIn)
+                            : '--:--'
+                          }
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Saída</p>
+                        <p className="text-xl font-mono font-bold">
+                          {dashboardData?.entries.checkOut 
+                            ? formatTime(dashboardData.entries.checkOut)
+                            : '--:--'
+                          }
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="text-right space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Progresso do dia</p>
-                    <p className="text-3xl font-bold">{progress}%</p>
+                <div className="flex flex-col items-center lg:items-end space-y-4">
+                  <div className="text-center lg:text-right">
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Progresso do dia</p>
+                    <p className="text-4xl font-bold">{progress}%</p>
                   </div>
                   
-                  <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="w-40 h-3 bg-white/30 rounded-full overflow-hidden border border-white/20">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
@@ -274,8 +277,8 @@ export const Dashboard: React.FC = () => {
                     />
                   </div>
                   
-                  <div>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="text-center lg:text-right">
+                    <p className="text-sm font-medium text-muted-foreground">
                       {formatDuration(dashboardData?.workingHours.worked || 0)} trabalhadas
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -325,143 +328,107 @@ export const Dashboard: React.FC = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Quick Actions */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Ações Rápidas
-              </CardTitle>
-              <CardDescription>
-                Registre seu ponto rapidamente
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Button 
-                className="w-full" 
-                size="lg"
-                variant={dashboardData?.status === 'not_started' ? 'default' : 'secondary'}
-                onClick={handleQuickAction}
-                disabled={createEntryMutation.isLoading || nextAction.disabled}
-                loading={createEntryMutation.isLoading}
-              >
-                <Clock className="h-4 w-4" />
-                {nextAction.label}
-              </Button>
-              
-              <Link to="/history">
-                <Button variant="outline" className="w-full">
-                  <Calendar className="h-4 w-4" />
-                  Ver Histórico
-                </Button>
-              </Link>
-              
-              <Link to="/time-entry">
-                <Button variant="outline" className="w-full">
-                  <Clock className="h-4 w-4" />
-                  Registrar Ponto
-                </Button>
-              </Link>
-              
-              <Link to="/schedules">
-                <Button variant="outline" className="w-full">
-                  <Users className="h-4 w-4" />
-                  Expedientes
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* Últimas Atividades */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Últimas Atividades</CardTitle>
-              <CardDescription>
-                Seus registros mais recentes
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {(() => {
-                  const entries = dashboardData?.entries || {};
-                  const activities = [];
-                  
-                  if (entries.checkIn) {
-                    activities.push({
-                      key: 'checkIn',
-                      label: 'Entrada registrada',
-                      time: entries.checkIn,
-                      icon: Clock,
-                      color: 'bg-green-500'
-                    });
-                  }
-                  
-                  if (entries.lunchOut) {
-                    activities.push({
-                      key: 'lunchOut',
-                      label: 'Saída para almoço',
-                      time: entries.lunchOut,
-                      icon: Coffee,
-                      color: 'bg-yellow-500'
-                    });
-                  }
-                  
-                  if (entries.lunchIn) {
-                    activities.push({
-                      key: 'lunchIn',
-                      label: 'Volta do almoço',
-                      time: entries.lunchIn,
-                      icon: Coffee,
-                      color: 'bg-blue-500'
-                    });
-                  }
-                  
-                  if (entries.checkOut) {
-                    activities.push({
-                      key: 'checkOut',
-                      label: 'Saída registrada',
-                      time: entries.checkOut,
-                      icon: CheckCircle2,
-                      color: 'bg-red-500'
-                    });
-                  }
-                  
-                  if (activities.length === 0) {
-                    return (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <Timer className="h-8 w-8 mx-auto mb-2" />
-                        <p>Nenhuma atividade registrada hoje</p>
-                      </div>
-                    );
-                  }
-                  
-                  return activities.map((activity, index) => {
-                    const IconComponent = activity.icon;
-                    return (
-                      <motion.div
-                        key={activity.key}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="flex items-center gap-4 p-3 rounded-lg bg-muted/50"
-                      >
-                        <div className={`p-2 rounded-full ${activity.color}`}>
-                          <IconComponent className="h-4 w-4 text-white" />
+        {/* Últimas Atividades - Centralized */}
+        <div className="flex justify-center">
+          <div className="w-full max-w-2xl">
+            <Card>
+              <CardHeader className="text-center">
+                <CardTitle className="flex items-center justify-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Últimas Atividades
+                </CardTitle>
+                <CardDescription>
+                  Seus registros mais recentes do dia
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {(() => {
+                    const entries = dashboardData?.entries || {};
+                    const activities = [];
+                    
+                    if (entries.checkIn) {
+                      activities.push({
+                        key: 'checkIn',
+                        label: 'Entrada registrada',
+                        time: entries.checkIn,
+                        icon: Clock,
+                        color: 'bg-green-500'
+                      });
+                    }
+                    
+                    if (entries.lunchOut) {
+                      activities.push({
+                        key: 'lunchOut',
+                        label: 'Saída para almoço',
+                        time: entries.lunchOut,
+                        icon: Coffee,
+                        color: 'bg-yellow-500'
+                      });
+                    }
+                    
+                    if (entries.lunchIn) {
+                      activities.push({
+                        key: 'lunchIn',
+                        label: 'Volta do almoço',
+                        time: entries.lunchIn,
+                        icon: Coffee,
+                        color: 'bg-blue-500'
+                      });
+                    }
+                    
+                    if (entries.checkOut) {
+                      activities.push({
+                        key: 'checkOut',
+                        label: 'Saída registrada',
+                        time: entries.checkOut,
+                        icon: CheckCircle2,
+                        color: 'bg-red-500'
+                      });
+                    }
+                    
+                    if (activities.length === 0) {
+                      return (
+                        <div className="text-center py-12 text-muted-foreground">
+                          <Timer className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                          <p className="text-lg font-medium">Nenhuma atividade registrada hoje</p>
+                          <p className="text-sm mt-1">Seus registros de ponto aparecerão aqui</p>
                         </div>
-                        <div className="flex-1">
-                          <p className="font-medium">{activity.label}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {formatTime(activity.time)}
-                          </p>
-                        </div>
-                      </motion.div>
-                    );
-                  });
-                })()}
-              </div>
-            </CardContent>
-          </Card>
+                      );
+                    }
+                    
+                    return activities.map((activity, index) => {
+                      const IconComponent = activity.icon;
+                      return (
+                        <motion.div
+                          key={activity.key}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1, duration: 0.3 }}
+                          className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-muted/30 to-muted/10 border border-border/50 hover:shadow-md transition-all duration-200"
+                        >
+                          <div className={`p-3 rounded-full ${activity.color} shadow-lg`}>
+                            <IconComponent className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-semibold text-foreground">{activity.label}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Registrado hoje
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xl font-mono font-bold">
+                              {formatTime(activity.time)}
+                            </p>
+                          </div>
+                        </motion.div>
+                      );
+                    });
+                  })()}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </Layout>
