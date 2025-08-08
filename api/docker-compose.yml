@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: mvpponto-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mvpponto
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mvpponto-network
+
+  # Opcional: PgAdmin para gerenciamento visual do banco
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: mvpponto-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@mvpponto.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    networks:
+      - mvpponto-network
+
+volumes:
+  postgres_data:
+
+networks:
+  mvpponto-network:
+    driver: bridge

@@ -1,0 +1,160 @@
+{
+  "info": {
+    "name": "MvPPonto API",
+    "description": "Coleção de testes para API do sistema de ponto eletrônico",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@mvpponto.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "test": [
+              "pm.test(\"Login successful\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('accessToken');",
+              "    pm.globals.set('access_token', jsonData.accessToken);",
+              "});"
+            ]
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/auth/me",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "test": [
+              "pm.test(\"Profile retrieved\", function () {",
+              "    pm.response.to.have.status(200);",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('email');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Time Entries",
+      "item": [
+        {
+          "name": "Clock IN",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/time-entries",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"IN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/time-entries/dashboard",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Get History",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/time-entries/history?startDate=2024-01-01&endDate=2024-12-31",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users (Admin)",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/users/admin",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@test.com\",\n  \"password\": \"password123\",\n  \"role\": \"user\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/users/admin",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    }
+  ]
+}
