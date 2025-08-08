@@ -224,61 +224,86 @@ export const SchedulesPage: React.FC = () => {
                 </select>
               </div>
 
-              {/* Time Inputs */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <Input 
-                  type="date" 
-                  label="Data" 
-                  value={date} 
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
-                <Input 
-                  type="time" 
-                  label="Horário de Início" 
-                  value={startTime} 
-                  onChange={(e) => {
-                    setStartTime(e.target.value);
-                    if (selectedPreset !== 'Personalizado') {
-                      setSelectedPreset('Personalizado');
-                    }
-                  }}
-                  required
-                />
-                <Input 
-                  type="time" 
-                  label="Horário de Fim" 
-                  value={endTime} 
-                  onChange={(e) => {
-                    setEndTime(e.target.value);
-                    if (selectedPreset !== 'Personalizado') {
-                      setSelectedPreset('Personalizado');
-                    }
-                  }}
-                  required
-                />
-                <Input 
-                  type="time" 
-                  label="Início do Almoço (opcional)" 
-                  value={lunchStart} 
-                  onChange={(e) => {
-                    setLunchStart(e.target.value);
-                    if (selectedPreset !== 'Personalizado') {
-                      setSelectedPreset('Personalizado');
-                    }
-                  }}
-                />
-                <Input 
-                  type="time" 
-                  label="Fim do Almoço (opcional)" 
-                  value={lunchEnd} 
-                  onChange={(e) => {
-                    setLunchEnd(e.target.value);
-                    if (selectedPreset !== 'Personalizado') {
-                      setSelectedPreset('Personalizado');
-                    }
-                  }}
-                />
+              {/* Form Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left pb-3 px-2 text-sm font-medium text-muted-foreground">Data</th>
+                      <th className="text-left pb-3 px-2 text-sm font-medium text-muted-foreground">Horário de Início</th>
+                      <th className="text-left pb-3 px-2 text-sm font-medium text-muted-foreground">Horário de Fim</th>
+                      <th className="text-left pb-3 px-2 text-sm font-medium text-muted-foreground">Início do Almoço<br/>(opcional)</th>
+                      <th className="text-left pb-3 px-2 text-sm font-medium text-muted-foreground">Fim do Almoço<br/>(opcional)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="py-3 px-2">
+                        <Input 
+                          type="date" 
+                          value={date} 
+                          onChange={(e) => setDate(e.target.value)}
+                          required
+                          className="min-w-[140px]"
+                        />
+                      </td>
+                      <td className="py-3 px-2">
+                        <Input 
+                          type="time" 
+                          value={startTime} 
+                          onChange={(e) => {
+                            setStartTime(e.target.value);
+                            if (selectedPreset !== 'Personalizado') {
+                              setSelectedPreset('Personalizado');
+                            }
+                          }}
+                          required
+                          className="min-w-[100px]"
+                        />
+                      </td>
+                      <td className="py-3 px-2">
+                        <Input 
+                          type="time" 
+                          value={endTime} 
+                          onChange={(e) => {
+                            setEndTime(e.target.value);
+                            if (selectedPreset !== 'Personalizado') {
+                              setSelectedPreset('Personalizado');
+                            }
+                          }}
+                          required
+                          className="min-w-[100px]"
+                        />
+                      </td>
+                      <td className="py-3 px-2">
+                        <Input 
+                          type="time" 
+                          value={lunchStart} 
+                          onChange={(e) => {
+                            setLunchStart(e.target.value);
+                            if (selectedPreset !== 'Personalizado') {
+                              setSelectedPreset('Personalizado');
+                            }
+                          }}
+                          className="min-w-[100px]"
+                        />
+                      </td>
+                      <td className="py-3 px-2">
+                        <Input 
+                          type="time" 
+                          value={lunchEnd} 
+                          onChange={(e) => {
+                            setLunchEnd(e.target.value);
+                            if (selectedPreset !== 'Personalizado') {
+                              setSelectedPreset('Personalizado');
+                            }
+                          }}
+                          className="min-w-[100px]"
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
 
               {/* Action Buttons */}

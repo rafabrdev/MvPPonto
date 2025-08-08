@@ -207,7 +207,7 @@ export const UsersPage: React.FC = () => {
             </select>
           </div>
 
-          <Button onClick={handleCreateUser}>
+          <Button onClick={handleCreateUser} className="flex items-center">
             <UserPlus className="h-4 w-4 mr-2" />
             Novo Usuário
           </Button>
@@ -222,62 +222,65 @@ export const UsersPage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
-              <Card className="relative overflow-hidden hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <Avatar
-                        name={user.name}
-                        size="lg"
-                        variant="gradient"
-                      />
-                      <div>
-                        <h3 className="font-semibold text-lg">{user.name}</h3>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
+              <Card className="relative overflow-hidden hover:shadow-md transition-shadow h-full">
+                <CardContent className="p-5">
+                  <div className="flex flex-col space-y-4">
+                    {/* Header com Avatar e Info */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Avatar
+                          name={user.name}
+                          size="default"
+                          variant="gradient"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-base truncate">{user.name}</h3>
+                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="relative">
-                      <button className="p-2 hover:bg-muted rounded-full transition-colors">
+                      
+                      <button className="p-1.5 hover:bg-muted rounded-full transition-colors flex-shrink-0">
                         <MoreHorizontal className="h-4 w-4" />
                       </button>
                     </div>
-                  </div>
 
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`flex items-center gap-2 px-2 py-1 rounded-full border text-xs font-medium ${
-                      getRoleBadgeColor(user.role)
-                    }`}>
-                      {getRoleIcon(user.role)}
-                      {capitalize(user.role)}
+                    {/* Role Badge e Data */}
+                    <div className="flex items-center justify-between">
+                      <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full border text-xs font-medium ${
+                        getRoleBadgeColor(user.role)
+                      }`}>
+                        {getRoleIcon(user.role)}
+                        {capitalize(user.role)}
+                      </div>
+                      
+                      <span className="text-xs text-muted-foreground">
+                        Desde {formatDate(user.createdAt).split(',')[0]}
+                      </span>
                     </div>
-                    
-                    <span className="text-xs text-muted-foreground">
-                      Desde {formatDate(user.createdAt).split(',')[0]}
-                    </span>
-                  </div>
 
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditUser(user)}
-                      className="flex-1"
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Editar
-                    </Button>
-                    
-                    {currentUser?.role === 'admin' && user.id !== currentUser.id && (
+                    {/* Ações */}
+                    <div className="flex gap-2 pt-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDeleteUser(user.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleEditUser(user)}
+                        className="flex-1 flex items-center justify-center"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Edit className="h-3.5 w-3.5 mr-1.5" />
+                        Editar
                       </Button>
-                    )}
+                      
+                      {currentUser?.role === 'admin' && user.id !== currentUser.id && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

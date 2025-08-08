@@ -260,35 +260,42 @@ export const Reports: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              whileHover={{ y: -4 }}
+              whileHover={{ y: -2 }}
+              className="h-full"
             >
-              <Card className="relative overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-muted-foreground">
+              <Card className="relative overflow-hidden h-full hover:shadow-md transition-shadow duration-200">
+                <CardContent className="p-4">
+                  <div className="flex flex-col items-center justify-center space-y-3">
+                    <div className={`p-3 rounded-xl bg-gradient-to-br ${
+                      metric.color === 'blue' ? 'from-blue-500/15 to-blue-600/10' :
+                      metric.color === 'green' ? 'from-green-500/15 to-green-600/10' :
+                      metric.color === 'yellow' ? 'from-yellow-500/15 to-yellow-600/10' :
+                      'from-purple-500/15 to-purple-600/10'
+                    }`}>
+                      {React.cloneElement(metric.icon as React.ReactElement, { className: "h-5 w-5" })}
+                    </div>
+                    
+                    <div className="text-center space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         {metric.title}
                       </p>
-                      <p className="text-2xl font-bold">{metric.value}</p>
+                      <p className="text-xl font-bold text-foreground">
+                        {metric.value}
+                      </p>
                       {metric.change && (
-                        <div className={`flex items-center text-xs ${
+                        <p className={`text-xs font-medium ${
                           metric.trend === 'up' 
                             ? 'text-green-600' 
                             : metric.trend === 'down' 
                             ? 'text-red-600' 
                             : 'text-muted-foreground'
                         }`}>
-                          {metric.trend === 'up' && <TrendingUp className="h-3 w-3 mr-1" />}
                           {metric.change}
-                        </div>
+                        </p>
                       )}
-                    </div>
-                    <div className={`p-3 rounded-xl bg-${metric.color}-500/10`}>
-                      {metric.icon}
                     </div>
                   </div>
                 </CardContent>
-                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-l from-${metric.color}-500/5 to-transparent rounded-full transform translate-x-16 -translate-y-16`} />
               </Card>
             </motion.div>
           ))}

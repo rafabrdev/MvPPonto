@@ -97,7 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       className="relative h-full bg-card/50 backdrop-blur-xl border-r border-border/50 flex flex-col"
     >
       {/* Header */}
-      <div className="p-6 border-b border-border/50">
+      <div className="h-16 px-6 flex items-center border-b border-border/50">
         <div className="flex items-center gap-3">
           <div className="flex-shrink-0">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
@@ -116,36 +116,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 <h1 className="text-xl font-bold text-gradient">MvPPonto</h1>
                 <p className="text-xs text-muted-foreground">Sistema de Ponto</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-
-      {/* User Info */}
-      <div className="p-6 border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <Avatar
-            name={user?.name}
-            size={collapsed ? 'default' : 'lg'}
-            variant="glow"
-            showStatus
-            status="online"
-          />
-          
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-                className="flex-1 min-w-0"
-              >
-                <p className="font-semibold truncate">{user?.name}</p>
-                <p className="text-xs text-muted-foreground truncate capitalize">
-                  {user?.role}
-                </p>
               </motion.div>
             )}
           </AnimatePresence>

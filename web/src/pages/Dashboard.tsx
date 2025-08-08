@@ -45,37 +45,37 @@ const MetricCard: React.FC<MetricCardProps> = ({
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    whileHover={{ y: -4 }}
+    whileHover={{ y: -2 }}
     transition={{ duration: 0.3 }}
+    className="h-full"
   >
-    <Card className="relative overflow-hidden">
-      <CardContent className="p-6 text-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className={`p-3 rounded-xl bg-${color}-500/10 mx-auto`}>
+    <Card className="relative overflow-hidden h-full hover:shadow-md transition-shadow duration-200">
+      <CardContent className="p-4">
+        <div className="flex flex-col items-center justify-center space-y-3">
+          <div className={`p-3 rounded-xl bg-gradient-to-br ${
+            color === 'primary' ? 'from-primary-500/15 to-primary-600/10' :
+            color === 'green' ? 'from-green-500/15 to-green-600/10' :
+            color === 'yellow' ? 'from-yellow-500/15 to-yellow-600/10' :
+            'from-purple-500/15 to-purple-600/10'
+          }`}>
             {icon}
           </div>
           
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{title}</p>
-            <p className="text-3xl font-bold tracking-tight">{value}</p>
+          <div className="text-center space-y-1">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              {title}
+            </p>
+            <p className="text-xl font-bold text-foreground">
+              {value}
+            </p>
             {subtitle && (
-              <p className="text-xs text-muted-foreground">{subtitle}</p>
+              <p className="text-xs text-muted-foreground">
+                {subtitle}
+              </p>
             )}
           </div>
-          
-          {trend && (
-            <div className={`flex items-center text-xs font-medium ${
-              trend.isPositive ? 'text-green-600' : 'text-red-600'
-            }`}>
-              <TrendingUp className={`h-3 w-3 mr-1 ${trend.isPositive ? '' : 'rotate-180'}`} />
-              {trend.value}% vs. semana passada
-            </div>
-          )}
         </div>
       </CardContent>
-      
-      {/* Background gradient */}
-      <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-l from-${color}-500/5 to-transparent rounded-full transform translate-x-8 -translate-y-8`} />
     </Card>
   </motion.div>
 );
@@ -297,8 +297,7 @@ export const Dashboard: React.FC = () => {
             title="Horas Trabalhadas"
             value={formatDuration(dashboardData?.workingHours.worked || 0)}
             subtitle="Hoje"
-            icon={<Timer className="h-6 w-6 text-primary-500" />}
-            trend={{ value: 12, isPositive: true }}
+            icon={<Timer className="h-5 w-5 text-primary-500" />}
             color="primary"
           />
           
@@ -306,7 +305,7 @@ export const Dashboard: React.FC = () => {
             title="Meta do Dia"
             value={formatDuration(dashboardData?.workingHours.expectedTotal || 480)}
             subtitle="8 horas padrão"
-            icon={<Target className="h-6 w-6 text-green-500" />}
+            icon={<Target className="h-5 w-5 text-green-500" />}
             color="green"
           />
           
@@ -314,8 +313,7 @@ export const Dashboard: React.FC = () => {
             title="Eficiência"
             value={`${progress}%`}
             subtitle="Do dia atual"
-            icon={<Award className="h-6 w-6 text-yellow-500" />}
-            trend={{ value: 8, isPositive: true }}
+            icon={<Award className="h-5 w-5 text-yellow-500" />}
             color="yellow"
           />
           
@@ -323,14 +321,14 @@ export const Dashboard: React.FC = () => {
             title="Dias no Mês"
             value="22"
             subtitle="22 trabalháveis"
-            icon={<Calendar className="h-6 w-6 text-purple-500" />}
+            icon={<Calendar className="h-5 w-5 text-purple-500" />}
             color="purple"
           />
         </div>
 
-        {/* Últimas Atividades - Centralized */}
-        <div className="flex justify-center">
-          <div className="w-full max-w-2xl">
+        {/* Últimas Atividades */}
+        <div>
+          <div className="w-full">
             <Card>
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">
