@@ -1,70 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-// Tipos simples para demonstração
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'manager' | 'user';
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-// Dados de demonstração
-const mockUsers: Record<string, User> = {
-  'admin@mvpponto.com': {
-    id: '1',
-    name: 'Administrador',
-    email: 'admin@mvpponto.com',
-    role: 'admin',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  'pedro@mvpponto.com': {
-    id: '2',
-    name: 'Pedro Silva',
-    email: 'pedro@mvpponto.com',
-    role: 'manager',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  'joao@mvpponto.com': {
-    id: '3',
-    name: 'João Santos',
-    email: 'joao@mvpponto.com',
-    role: 'user',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  'maria@mvpponto.com': {
-    id: '4',
-    name: 'Maria Oliveira',
-    email: 'maria@mvpponto.com',
-    role: 'user',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-};
-
-const validPasswords: Record<string, string> = {
-  'admin@mvpponto.com': 'admin123',
-  'pedro@mvpponto.com': 'manager123',
-  'joao@mvpponto.com': 'user123',
-  'maria@mvpponto.com': 'user123'
-};
+import { api, type LoginRequest, type User } from '../lib/api';
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   login: (credentials: LoginRequest) => Promise<void>;
   logout: () => void;
@@ -83,105 +26,58 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (credentials) => {
         set({ isLoading: true, error: null });
-        
-        // Simular delay da API
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
         try {
-          const { email, password } = credentials;
-          
-          // Verificar credenciais
-          if (!mockUsers[email] || validPasswords[email] !== password) {
-            throw new Error('Email ou senha inválidos');
-          }
-          
-          const user = mockUsers[email];
-          
-          // Simular tokens
-          const tokens = {
-            accessToken: `mock-token-${user.id}`,
-            refreshToken: `mock-refresh-${user.id}`
-          };
-          
-          // Salvar tokens
-          localStorage.setItem('accessToken', tokens.accessToken);
-          localStorage.setItem('refreshToken', tokens.refreshToken);
-          
+          const data = await api.login(credentials);
+
+          // Persistir tokens conforme esperado pelo client da API
+          localStorage.setItem('accessToken', data.accessToken);
+          localStorage.setItem('refreshToken', data.refreshToken);
+
           set({
-            user,
+            user: data.user,
             isAuthenticated: true,
             isLoading: false,
-            error: null
+            error: null,
           });
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'Erro no login',
             isLoading: false,
             isAuthenticated: false,
-            user: null
+            user: null,
           });
           throw error;
         }
       },
 
       logout: () => {
-        // Remover tokens
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        
-        set({
-          user: null,
-          isAuthenticated: false,
-          error: null
-        });
+        set({ user: null, isAuthenticated: false, error: null });
       },
 
       checkAuth: async () => {
         const token = localStorage.getItem('accessToken');
-        
-        if (!token || !token.startsWith('mock-token-')) {
+        if (!token) {
           set({ isAuthenticated: false, user: null });
           return;
         }
-
         set({ isLoading: true });
-        
         try {
-          // Extrair ID do token simulado
-          const userId = token.replace('mock-token-', '');
-          const user = Object.values(mockUsers).find(u => u.id === userId);
-          
-          if (user) {
-            set({
-              user,
-              isAuthenticated: true,
-              isLoading: false,
-              error: null
-            });
-          } else {
-            throw new Error('Token inválido');
-          }
-        } catch (error) {
-          // Token inválido
+          const me = await api.me();
+          set({ user: me, isAuthenticated: true, isLoading: false, error: null });
+        } catch {
           get().logout();
           set({ isLoading: false });
         }
       },
 
-      updateUser: (user) => {
-        set({ user });
-      },
-
-      clearError: () => {
-        set({ error: null });
-      }
+      updateUser: (user) => set({ user }),
+      clearError: () => set({ error: null }),
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({ 
-        user: state.user, 
-        isAuthenticated: state.isAuthenticated 
-      })
+      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
     }
   )
 );

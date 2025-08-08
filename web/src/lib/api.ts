@@ -78,6 +78,17 @@ export interface ApiError {
   stack?: string;
 }
 
+export class ApiClientError extends Error {
+  status: number;
+  retryAfter?: number;
+  constructor(message: string, status: number, retryAfter?: number) {
+    super(message);
+    this.name = 'ApiClientError';
+    this.status = status;
+    this.retryAfter = retryAfter;
+  }
+}
+
 // Configuração da API
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 
@@ -110,14 +121,29 @@ class ApiClient {
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           window.location.href = '/login';
-          throw new Error('Sessão expirada');
+          throw new ApiClientError('Sessão expirada', 401);
         }
         // Não retornar aqui - deixar o código continuar para retry
         throw new Error('TOKEN_REFRESH_NEEDED');
       }
 
-      const errorData: ApiError = await response.json();
-      throw new Error(errorData.message || 'Erro na requisição');
+      // Tentar extrair mensagem do corpo (padrão GlobalExceptionFilter)
+      let message = 'Erro na requisição';
+      try {
+        const errorData: ApiError = await response.json();
+        message = errorData?.message || message;
+      } catch {
+        // ignore body parse errors
+      }
+
+      // Tratar rate limit (429) e expor Retry-After quando disponível
+      if (response.status === 429) {
+        const retryAfterHeader = response.headers.get('Retry-After');
+        const retryAfter = retryAfterHeader ? Number(retryAfterHeader) : undefined;
+        throw new ApiClientError(message || 'Muitas requisições. Tente novamente mais tarde.', 429, retryAfter);
+      }
+
+      throw new ApiClientError(message, response.status);
     }
 
     return response.json();
@@ -163,8 +189,8 @@ class ApiClient {
       });
 
       return await this.handleResponse<T>(response);
-    } catch (error) {
-      if (error.message === 'TOKEN_REFRESH_NEEDED') {
+    } catch (error: any) {
+      if (error?.message === 'TOKEN_REFRESH_NEEDED') {
         // Retry a requisição após refresh
         const response = await fetch(url, {
           ...options,
@@ -181,10 +207,29 @@ class ApiClient {
 
   // Auth endpoints
   async login(data: LoginRequest): Promise<LoginResponse> {
-    return this.request('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
+    // Retry leve para 429 em dev (até 3 tentativas)
+    const maxAttempts = 3;
+    let attempt = 0;
+    let lastError: any;
+    while (attempt < maxAttempts) {
+      try {
+        return await this.request('/auth/login', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' },
+          body: JSON.stringify(data)
+        });
+      } catch (err: any) {
+        lastError = err;
+        if (err instanceof ApiClientError && err.status === 429) {
+          attempt++;
+          const waitSeconds = err.retryAfter && err.retryAfter > 0 ? err.retryAfter : (1 * attempt);
+          await new Promise((res) => setTimeout(res, waitSeconds * 1000));
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw lastError;
   }
 
   async me(): Promise<User> {

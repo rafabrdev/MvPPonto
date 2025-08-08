@@ -4,12 +4,13 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Mail, Lock, ArrowRight, Clock } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Clock, BarChart3, Users } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
-import { useAuthStore, type LoginRequest } from '../../store/auth';
+import { useAuthStore } from '../../store/auth';
 import { cn } from '../../lib/utils';
+import { ApiClientError } from '../../lib/api';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -28,6 +29,13 @@ const testimonialCredentials = [
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login, isLoading, error, isAuthenticated } = useAuthStore();
+  const [cooldown, setCooldown] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setInterval(() => setCooldown((c) => c - 1), 1000);
+    return () => clearInterval(t);
+  }, [cooldown]);
 
   const {
     register,
@@ -47,8 +55,12 @@ export const Login: React.FC = () => {
     try {
       await login(data);
       navigate('/dashboard');
-    } catch (err) {
-      // Erro já tratado no store
+    } catch (err: any) {
+      if (err instanceof ApiClientError && err.status === 429) {
+        // Ativar cooldown com Retry-After se enviado, senão 30s padrão
+        setCooldown(err.retryAfter && err.retryAfter > 0 ? err.retryAfter : 30);
+      }
+      // Demais erros já estão no store.error
     }
   };
 
@@ -56,6 +68,8 @@ export const Login: React.FC = () => {
     setValue('email', email);
     setValue('password', password);
   };
+
+  const isDisabled = isLoading || cooldown > 0;
 
   return (
     <div className="min-h-screen flex">
@@ -99,7 +113,7 @@ export const Login: React.FC = () => {
                   placeholder="seu@email.com"
                   leftIcon={<Mail className="h-4 w-4" />}
                   error={errors.email?.message}
-                  disabled={isLoading}
+                  disabled={isDisabled}
                 />
 
                 <Input
@@ -110,16 +124,18 @@ export const Login: React.FC = () => {
                   leftIcon={<Lock className="h-4 w-4" />}
                   error={errors.password?.message}
                   showPasswordToggle
-                  disabled={isLoading}
+                  disabled={isDisabled}
                 />
 
-                {error && (
+                {(error || cooldown > 0) && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm"
                   >
-                    {error}
+                    {cooldown > 0 
+                      ? `Muitas requisições. Tente novamente em ${cooldown}s.` 
+                      : error}
                   </motion.div>
                 )}
 
@@ -128,10 +144,11 @@ export const Login: React.FC = () => {
                   className="w-full"
                   size="lg"
                   loading={isLoading}
+                  disabled={isDisabled}
                   icon={<ArrowRight className="h-4 w-4" />}
                   iconPosition="right"
                 >
-                  {isLoading ? 'Entrando...' : 'Entrar'}
+                  {isLoading ? 'Entrando...' : cooldown > 0 ? `Aguarde ${cooldown}s` : 'Entrar'}
                 </Button>
               </form>
 
@@ -214,6 +231,26 @@ export const Login: React.FC = () => {
             <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                  <BarChart3 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Relatórios Avançados</h3>
+                  <p className="text-white/70 text-sm">Analytics completos da equipe</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Users className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Gestão Simplificada</h3>
+                  <p className="text-white/70 text-sm">Interface intuitiva para managers</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
                   <Clock className="w-6 h-6" />
                 </div>
                 <div>
@@ -224,9 +261,32 @@ export const Login: React.FC = () => {
             </div>
           </motion.div>
         </div>
+
+        {/* Floating Elements */}
+        <motion.div
+          animate={{
+            y: [0, -20, 0],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: 'easeInOut'
+          }}
+          className="absolute top-20 right-20 w-32 h-32 bg-white/10 rounded-2xl backdrop-blur-sm"
+        />
+        <motion.div
+          animate={{
+            y: [0, 20, 0],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: 1
+          }}
+          className="absolute bottom-32 left-20 w-24 h-24 bg-white/10 rounded-2xl backdrop-blur-sm"
+        />
       </div>
     </div>
   );
 };
-
-export default Login;
