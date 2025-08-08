@@ -219,7 +219,7 @@ export const Dashboard: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-6">
+                  <div className="grid grid-cols-4 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Entrada</p>
                       <p className="text-xl font-mono font-semibold">
@@ -243,6 +243,15 @@ export const Dashboard: React.FC = () => {
                       <p className="text-xl font-mono font-semibold">
                         {dashboardData?.entries.lunchIn 
                           ? formatTime(dashboardData.entries.lunchIn)
+                          : '--:--'
+                        }
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Saída</p>
+                      <p className="text-xl font-mono font-semibold">
+                        {dashboardData?.entries.checkOut 
+                          ? formatTime(dashboardData.entries.checkOut)
                           : '--:--'
                         }
                       </p>

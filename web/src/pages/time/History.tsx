@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
-import { Clock, Coffee, ArrowRight, LogOut } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Clock, Coffee, ArrowRight, LogOut, Edit, Save, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -14,6 +14,9 @@ export const History: React.FC = () => {
   const [endDate, setEndDate] = React.useState<string>('');
   const [page, setPage] = React.useState<number>(1);
   const [limit] = React.useState<number>(10);
+  const [editingEntry, setEditingEntry] = React.useState<string | null>(null);
+  const [editTime, setEditTime] = React.useState<string>('');
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: ['history', { startDate, endDate, page, limit }],
@@ -26,9 +29,59 @@ export const History: React.FC = () => {
   const history = data?.data || [];
   const pagination = data?.pagination;
 
+  // Mutation for updating time entries
+  const updateEntryMutation = useMutation({
+    mutationFn: async ({ entryId, newTimestamp }: { entryId: string; newTimestamp: string }) => {
+      return api.updateTimeEntry(entryId, { timestamp: newTimestamp });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['history'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      setEditingEntry(null);
+      setEditTime('');
+    },
+    onError: (error) => {
+      console.error('Failed to update entry:', error);
+      alert('Falha ao atualizar o registro. Tente novamente.');
+    }
+  });
+
   const applyFilters = () => {
     setPage(1);
     refetch();
+  };
+
+  const handleEditStart = (entry: TimeEntry) => {
+    setEditingEntry(entry.id);
+    // Convert timestamp to HH:mm format for time input
+    const date = new Date(entry.timestamp);
+    const timeString = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    setEditTime(timeString);
+  };
+
+  const handleEditSave = (entryId: string, originalTimestamp: string) => {
+    if (!editTime) {
+      alert('Por favor, insira um horário válido.');
+      return;
+    }
+
+    // Convert time string to timestamp
+    const originalDate = new Date(originalTimestamp);
+    const [hours, minutes] = editTime.split(':').map(Number);
+    
+    const newDate = new Date(originalDate);
+    newDate.setHours(hours);
+    newDate.setMinutes(minutes);
+
+    updateEntryMutation.mutate({
+      entryId,
+      newTimestamp: newDate.toISOString()
+    });
+  };
+
+  const handleEditCancel = () => {
+    setEditingEntry(null);
+    setEditTime('');
   };
 
   return (
@@ -53,7 +106,14 @@ export const History: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle>Registros</CardTitle>
-            <CardDescription>{isLoading ? 'Carregando...' : 'Lista agrupada por dia'}</CardDescription>
+            <CardDescription>
+              {isLoading ? 'Carregando...' : 'Lista agrupada por dia'}
+              {!isLoading && history.length > 0 && (
+                <span className="block mt-1 text-xs text-muted-foreground">
+                  💡 Passe o mouse sobre um registro para ver a opção de editar o horário
+                </span>
+              )}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -87,15 +147,17 @@ export const History: React.FC = () => {
                         OUT: <LogOut className="h-4 w-4" />
                       };
 
+                      const isEditing = editingEntry === entry.id;
+                      
                       return (
                         <motion.div
                           key={entry.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.3, delay: index * 0.05 }}
-                          className={`flex items-center justify-between p-3 rounded-lg border ${
+                          className={`group flex items-center justify-between p-3 rounded-lg border ${
                             typeColors[entry.type] || 'bg-muted/50'
-                          }`}
+                          } ${isEditing ? 'ring-2 ring-primary/20' : ''} hover:shadow-sm transition-all duration-200`}
                         >
                           <div className="flex items-center gap-3">
                             {typeIcons[entry.type]}
@@ -103,9 +165,50 @@ export const History: React.FC = () => {
                               {typeLabels[entry.type] || entry.type}
                             </span>
                           </div>
-                          <span className="text-sm font-mono font-semibold">
-                            {formatTime(entry.timestamp)}
-                          </span>
+                          
+                          <div className="flex items-center gap-2">
+                            {isEditing ? (
+                              <>
+                                <input
+                                  type="time"
+                                  value={editTime}
+                                  onChange={(e) => setEditTime(e.target.value)}
+                                  className="px-2 py-1 text-xs font-mono border border-border rounded bg-background"
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditSave(entry.id, entry.timestamp)}
+                                  disabled={updateEntryMutation.isLoading}
+                                  className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-100"
+                                >
+                                  <Save className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleEditCancel}
+                                  className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-100"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <span className="text-sm font-mono font-semibold">
+                                  {formatTime(entry.timestamp)}
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditStart(entry)}
+                                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
+                                >
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
                         </motion.div>
                       );
                     })}

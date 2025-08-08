@@ -58,6 +58,10 @@ export const UsersPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setIsCreateModalOpen(false);
       resetForm();
+    },
+    onError: (error) => {
+      console.error('Erro ao criar usuário:', error);
+      alert('Erro ao criar usuário. Verifique os dados e tente novamente.');
     }
   });
 

@@ -264,6 +264,13 @@ class ApiClient {
     return this.request(`/time-entries/history${queryString ? `?${queryString}` : ''}`);
   }
 
+  async updateTimeEntry(id: string, data: { timestamp: string }): Promise<ApiResponse<TimeEntry>> {
+    return this.request(`/time-entries/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
   // Users
   async getProfile(): Promise<ApiResponse<User>> {
     return this.request('/users/profile');

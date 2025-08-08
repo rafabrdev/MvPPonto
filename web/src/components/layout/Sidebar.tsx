@@ -203,7 +203,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {isActive && (
                   <motion.div
                     layoutId="activeIndicator"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full"
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                   />
                 )}
@@ -264,12 +264,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Collapse Toggle */}
       <button
         onClick={() => onCollapse?.(!collapsed)}
-        className="absolute -right-4 top-8 w-8 h-8 bg-background border border-border rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+        className="absolute -right-3 top-20 w-6 h-6 bg-background border border-border rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 z-10"
       >
         {collapsed ? (
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-3 w-3" />
         ) : (
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-3 w-3" />
         )}
       </button>
     </motion.div>

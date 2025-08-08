@@ -88,7 +88,8 @@ export const Layout: React.FC<LayoutProps> = ({
         />
         
         <main className={cn(
-          'flex-1 overflow-auto p-6',
+          'flex-1 overflow-auto p-4 md:p-6',
+          'max-w-full',
           className
         )}>
           <motion.div

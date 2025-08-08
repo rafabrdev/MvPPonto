@@ -10,6 +10,7 @@ import { History } from './pages/time/History';
 import { Reports } from './pages/reports/Reports';
 import { UsersPage } from './pages/users/Users';
 import { SchedulesPage } from './pages/schedules/Schedules';
+import { Settings } from './pages/settings/Settings';
 import './App.css';
 
 // Criar instância do QueryClient
@@ -81,6 +82,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SchedulesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute>
+                  <Settings />
                 </ProtectedRoute>
               } 
             />

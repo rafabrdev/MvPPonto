@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Calendar, Clock, Edit, Trash2, Plus } from 'lucide-react';
+import { Calendar, Clock, Edit, Trash2, Plus, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -36,11 +36,18 @@ export const SchedulesPage: React.FC = () => {
   const [selectedPreset, setSelectedPreset] = React.useState<string>('Padrão (08:00 - 17:00)');
   const [editingSchedule, setEditingSchedule] = React.useState<Schedule | null>(null);
   const [filterDate, setFilterDate] = React.useState<string>('');
+  const [alertDismissed, setAlertDismissed] = React.useState<boolean>(false);
 
   // Set today as default date
   React.useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     setDate(today);
+    
+    // Check if alert was previously dismissed
+    const dismissed = localStorage.getItem('schedules-alert-dismissed');
+    if (dismissed === 'true') {
+      setAlertDismissed(true);
+    }
   }, []);
 
   const { data: listData, isLoading } = useQuery({
@@ -134,9 +141,53 @@ export const SchedulesPage: React.FC = () => {
     }
   };
 
+  const dismissAlert = () => {
+    setAlertDismissed(true);
+    localStorage.setItem('schedules-alert-dismissed', 'true');
+  };
+
   return (
-    <Layout title="Expedientes" subtitle="Gerencie seus horários de trabalho">
+    <Layout title="Expedientes" subtitle="Configure seus horários de trabalho - NÃO é para editar registros de ponto já feitos">
       <div className="space-y-8">
+        {/* Aviso Dismissível */}
+        {!alertDismissed && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="relative"
+          >
+            <Card className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border-blue-200/60 backdrop-blur-sm">
+              <CardContent className="p-4 md:p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 rounded-full bg-blue-100">
+                    <Clock className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
+                  </div>
+                  <div className="space-y-2 flex-1 min-w-0">
+                    <h3 className="font-semibold text-blue-900 text-sm md:text-base">🔔 O que são Expedientes?</h3>
+                    <div className="text-xs md:text-sm text-blue-800 space-y-1 leading-relaxed">
+                      <p>• <strong>Expedientes</strong> são seus <strong>horários de trabalho planejados</strong> para cada dia</p>
+                      <p>• Use para definir quando você <strong>deve começar e terminar</strong> o trabalho</p>
+                      <p>• <strong>NÃO é para editar</strong> registros de ponto já batidos - isso fica no Histórico</p>
+                      <p className="hidden sm:block">• Exemplo: "Amanhã vou trabalhar das 08:00 às 17:00 com almoço das 12:00 às 13:00"</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={dismissAlert}
+                    className="flex-shrink-0 h-8 w-8 p-0 hover:bg-blue-100/50 text-blue-600 hover:text-blue-700"
+                    aria-label="Fechar aviso"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Form Card */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
